@@ -1,0 +1,150 @@
+# generated: 2026-02-21
+# project: BombCrypto Remake
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: D:\Godot\_bmad-output\implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories are typically worked sequentially; parallel work supported where noted
+# - SM creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context recommended)
+# - Recommended sprint order: E1 → E2+E3 (parallel) → E4 → E5 → E6+E7 (parallel) → E8 → E9
+
+generated: 2026-02-21
+project: BombCrypto Remake
+project_key: NOKEY
+tracking_system: file-system
+story_location: "D:\\Godot\\_bmad-output\\implementation-artifacts"
+
+development_status:
+
+  # ─────────────────────────────────────────────
+  # EPIC 1: Core Project Setup & Boilerplate
+  # Depends on: none | Priority: Critical
+  # ─────────────────────────────────────────────
+  epic-1: backlog
+  1-1-create-directory-structure: backlog
+  1-2-applogger-autoload: backlog
+  1-3-config-classes: backlog
+  1-4-stub-5-autoloads: backlog
+  1-5-main-scene-and-game-phase-fsm-skeleton: backlog
+  1-6-debugpanel: backlog
+  epic-1-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 2: Web3 & MetaMask Integration
+  # Depends on: E1 | Priority: Critical
+  # ─────────────────────────────────────────────
+  epic-2: backlog
+  2-1-metamask-bridge-utilities: backlog
+  2-2-wallet-connect-flow: backlog
+  2-3-herodata-resource: backlog
+  2-4-nft-metadata-fetch: backlog
+  2-5-nft-cache-disk-ttl-1-hour: backlog
+  epic-2-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 3: Server API Layer (REST + WebSocket)
+  # Depends on: E1 | Priority: Critical
+  # ─────────────────────────────────────────────
+  epic-3: backlog
+  3-1-websocket-connection-manager: backlog
+  3-2-auto-reconnect-logic: backlog
+  3-3-outgoing-message-protocol: backlog
+  3-4-incoming-message-parser-and-signal-emitter: backlog
+  3-5-rest-http-client: backlog
+  epic-3-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 4: Grid Map & Chest System
+  # Depends on: E1, E3 | Priority: High
+  # ─────────────────────────────────────────────
+  epic-4: backlog
+  4-1-gridmap-core: backlog
+  4-2-grid-visual-render: backlog
+  4-3-chest-node: backlog
+  4-4-chest-spawning: backlog
+  epic-4-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 5: Hero System & AI Idle Loop
+  # Depends on: E2, E3, E4 | Priority: Critical
+  # ─────────────────────────────────────────────
+  epic-5: backlog
+  5-1-herofactory: backlog
+  5-2-hero-node-visual-container: backlog
+  5-3-heroai-staggered-timer-and-grid-movement: backlog
+  5-4-heroai-optimistic-move-with-server-validation: backlog
+  5-5-heroai-bomb-intent: backlog
+  5-6-hero-stamina-display-client-mirror: backlog
+  epic-5-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 6: Bomb & Explosion System
+  # Depends on: E4, E5 | Priority: High
+  # ─────────────────────────────────────────────
+  epic-6: backlog
+  6-1-bomb-node-visual-only: backlog
+  6-2-bomb-spawn-from-server-confirmation: backlog
+  6-3-explosion-effect-and-chest-trigger: backlog
+  epic-6-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 7: UI/HUD & Game Screens
+  # Depends on: E2, E3, E5 | Priority: High
+  # ─────────────────────────────────────────────
+  epic-7: backlog
+  7-1-lobby-screen: backlog
+  7-2-herocard-widget: backlog
+  7-3-in-game-hud: backlog
+  7-4-rest-screen: backlog
+  7-5-game-phase-transitions-ui-side: backlog
+  epic-7-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 8: Game Phase FSM & Full Loop Integration
+  # Depends on: E3, E5, E6, E7 | Priority: High
+  # ─────────────────────────────────────────────
+  epic-8: backlog
+  8-1-gamephase-statemachine-full: backlog
+  8-2-hero-spawn-batch-khi-vao-treasure-hunt: backlog
+  8-3-bcoin-reward-integration: backlog
+  8-4-auto-rest-khi-stamina-can: backlog
+  8-5-settings-persistence: backlog
+  epic-8-retrospective: optional
+
+  # ─────────────────────────────────────────────
+  # EPIC 9: WebGL Export & Performance Polish
+  # Depends on: E8 | Priority: Medium
+  # ─────────────────────────────────────────────
+  epic-9: backlog
+  9-1-html5-export-configuration: backlog
+  9-2-metamask-integration-test-https: backlog
+  9-3-performance-benchmark-15-heroes: backlog
+  9-4-browser-edge-cases: backlog
+  9-5-audio-and-visuals-polish: backlog
+  epic-9-retrospective: optional
