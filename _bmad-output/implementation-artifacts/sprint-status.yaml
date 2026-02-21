@@ -70,30 +70,30 @@ development_status:
   # EPIC 3: Server API Layer (REST + WebSocket)
   # Depends on: E1 | Priority: Critical
   # ─────────────────────────────────────────────
-  epic-3: backlog
-  3-1-websocket-connection-manager: backlog
-  3-2-auto-reconnect-logic: backlog
-  3-3-outgoing-message-protocol: backlog
-  3-4-incoming-message-parser-and-signal-emitter: backlog
-  3-5-rest-http-client: backlog
+  epic-3: in-progress
+  3-1-websocket-connection-manager: done
+  3-2-auto-reconnect-logic: done
+  3-3-outgoing-message-protocol: done
+  3-4-incoming-message-parser-and-signal-emitter: done
+  3-5-rest-http-client: done
   epic-3-retrospective: optional
 
   # ─────────────────────────────────────────────
   # EPIC 4: Grid Map & Chest System
   # Depends on: E1, E3 | Priority: High
   # ─────────────────────────────────────────────
-  epic-4: backlog
-  4-1-gridmap-core: backlog
-  4-2-grid-visual-render: backlog
-  4-3-chest-node: backlog
-  4-4-chest-spawning: backlog
+  epic-4: done
+  4-1-gridmap-core: done
+  4-2-grid-visual-render: done
+  4-3-chest-node: done
+  4-4-chest-spawning: done
   epic-4-retrospective: optional
 
   # ─────────────────────────────────────────────
   # EPIC 5: Hero System & AI Idle Loop
   # Depends on: E2, E3, E4 | Priority: Critical
   # ─────────────────────────────────────────────
-  epic-5: backlog
+  epic-5: in-progress
   5-1-herofactory: backlog
   5-2-hero-node-visual-container: backlog
   5-3-heroai-staggered-timer-and-grid-movement: backlog
