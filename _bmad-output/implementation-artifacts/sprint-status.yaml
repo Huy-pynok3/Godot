@@ -58,12 +58,12 @@ development_status:
   # EPIC 2: Web3 & MetaMask Integration
   # Depends on: E1 | Priority: Critical
   # ─────────────────────────────────────────────
-  epic-2: backlog
-  2-1-metamask-bridge-utilities: backlog
-  2-2-wallet-connect-flow: backlog
-  2-3-herodata-resource: backlog
-  2-4-nft-metadata-fetch: backlog
-  2-5-nft-cache-disk-ttl-1-hour: backlog
+  epic-2: in-progress
+  2-1-metamask-bridge-utilities: done
+  2-2-wallet-connect-flow: done
+  2-3-herodata-resource: done
+  2-4-nft-metadata-fetch: done
+  2-5-nft-cache-disk-ttl-1-hour: done
   epic-2-retrospective: optional
 
   # ─────────────────────────────────────────────

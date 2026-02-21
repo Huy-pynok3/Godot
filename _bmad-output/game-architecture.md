@@ -171,7 +171,7 @@ All `JavaScriptBridge` calls are isolated in a single `Web3Manager` autoload. Th
 - On session start, check local JSON cache (`user://nft_cache.json`) for each hero token ID
 - If cached entry exists and age < 1 hour → use cached stats
 - If stale or missing → fetch from BSC RPC via `Web3Manager`
-- Cache stores: `{ token_id, power, speed, stamina, range, bomb_count, cached_at_unix }`
+- Cache stores: `{ token_id, power, speed, stamina, blast_range, bomb_count, cached_at_unix }`
 - Server re-validates NFT ownership on session auth — client cache is for speed, not authority
 
 ### Hero AI Tick System
@@ -428,7 +428,7 @@ res://
 | Game phase FSM | `src/core/game_phase_state_machine.gd` | Lobby / TreasureHunt / Rest transitions |
 | Hero node | `src/hero/hero.gd` | Visual representation + stat container |
 | Hero AI | `src/hero/hero_ai.gd` | Staggered timer, movement, bomb intent |
-| Hero stats | `src/hero/hero_data.gd` | Resource: power, speed, stamina, range, bomb_count |
+| Hero stats | `src/hero/hero_data.gd` | Resource: power, speed, stamina, blast_range, bomb_count |
 | Grid map | `src/map/grid_map.gd` | Cell occupancy, valid move queries |
 | Chest | `src/map/chest.gd` | Animated chest; destroyed on server signal |
 | Bomb | `src/bomb/bomb.gd` | Placed and exploded on server confirmation |
@@ -612,7 +612,7 @@ func _on_metadata_callback(token_id: int, args: Array) -> void:
 | `speed` | 1–10 | Tick interval: `BASE_INTERVAL - (speed * SPEED_STEP)` | — |
 | `stamina` | 1–10 | Displayed only | Authoritative stamina cap |
 | `power` | 1–10 | Sent in bomb intent payload | Damage calculation |
-| `range` | 1–10 | Sent in bomb intent payload | Blast radius validation |
+| `blast_range` | 1–10 | Sent in bomb intent payload | Blast radius validation |
 | `bomb_count` | 1–5 | Max simultaneous bombs tracked locally | Validated server-side |
 
 **HeroData Resource:**
@@ -625,7 +625,7 @@ extends Resource
 @export var power: int
 @export var speed: int
 @export var stamina: int
-@export var range: int
+@export var blast_range: int
 @export var bomb_count: int
 
 func get_move_interval() -> float:
@@ -640,7 +640,7 @@ static func from_dict(data: Dictionary) -> HeroData:
     h.power      = clampi(data.get("power", 1), 1, 10)
     h.speed      = clampi(data.get("speed", 1), 1, 10)
     h.stamina    = clampi(data.get("stamina", 1), 1, 10)
-    h.range      = clampi(data.get("range", 1), 1, 10)
+    h.blast_range = clampi(data.get("range", 1), 1, 10)
     h.bomb_count = clampi(data.get("bomb_count", 1), 1, 5)
     return h
 ```
