@@ -1,0 +1,31 @@
+installation:
+  version: 6.0.1
+  installDate: 2026-02-21T06:41:06.857Z
+  lastUpdated: 2026-02-21T06:41:06.857Z
+modules:
+  - name: core
+    version: 6.0.1
+    installDate: 2026-02-21T06:41:05.456Z
+    lastUpdated: 2026-02-21T06:41:05.456Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+  - name: gds
+    version: 0.1.7
+    installDate: 2026-02-21T06:41:03.510Z
+    lastUpdated: 2026-02-21T06:41:06.857Z
+    source: external
+    npmPackage: bmad-game-dev-studio
+    repoUrl: https://github.com/bmad-code-org/bmad-module-game-dev-studio.git
+ides:
+  - cursor
+  - codex
+  - claude-code
+  - windsurf
+  - auggie
+  - antigravity
+  - kilo
+  - kiro
+  - opencode
+  - qwen
+  - gemini
