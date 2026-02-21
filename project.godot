@@ -10,14 +10,20 @@ config_version=5
 
 [application]
 
-config/name="Godot"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/name="BombCrypto Remake"
+config/features=PackedStringArray("4.6", "gl_compatibility")
 config/icon="res://icon.svg"
-
-[physics]
-
-3d/physics_engine="Jolt Physics"
+run/main_scene="res://scenes/main.tscn"
 
 [rendering]
 
-rendering_device/driver.windows="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[autoload]
+
+AppLogger="*res://autoloads/app_logger.gd"
+GameState="*res://autoloads/game_state.gd"
+Web3Manager="*res://autoloads/web3_manager.gd"
+ServerAPI="*res://autoloads/server_api.gd"
+NFTCache="*res://autoloads/nft_cache.gd"

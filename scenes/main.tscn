@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cqmfrdpsffk1j"]
+
+[ext_resource type="Script" uid="uid://elnr4bi1oprr" path="res://src/core/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://d2764sqf3qau" path="res://src/core/game_phase_state_machine.gd" id="2_gpsm"]
+
+[node name="Main" type="Node" unique_id=1521524516]
+script = ExtResource("1_main")
+
+[node name="GamePhaseStateMachine" type="Node" parent="." unique_id=422679583]
+script = ExtResource("2_gpsm")

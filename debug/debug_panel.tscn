@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://debugpanel001"]
+
+[ext_resource type="Script" path="res://debug/debug_panel.gd" id="1_dp"]
+
+[node name="DebugPanel" type="Control"]
+script = ExtResource("1_dp")
+
+[node name="TitleLabel" type="Label" parent="."]
+text = "[DEBUG]"
