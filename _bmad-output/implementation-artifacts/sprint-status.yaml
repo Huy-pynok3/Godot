@@ -113,10 +113,10 @@ development_status:
   B2-2-implement-signature-verification: done
   B2-3-create-auth-guard: done
   epic-B2-retrospective: optional
-  epic-B3: backlog
-  B3-1-setup-websocket-gateway: backlog
-  B3-2-define-protocol-dtos: backlog
-  B3-3-implement-intent-handlers-stub: backlog
+  epic-B3: done
+  B3-1-setup-websocket-gateway: done
+  B3-2-define-protocol-dtos: done
+  B3-3-implement-intent-handlers-stub: done
   epic-B3-retrospective: optional
   epic-B4: backlog
   B4-1-implement-session-start-stop: backlog

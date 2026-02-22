@@ -1,7 +1,7 @@
 ---
 epic: B3
 title: "WebSocket Gateway & Protocol"
-status: "backlog"
+status: "done"
 priority: "high"
 depends_on: ["B1", "B2"]
 ---
@@ -12,11 +12,11 @@ depends_on: ["B1", "B2"]
 Establish the bidirectional, real-time communication channel (WebSocket) between the Godot client and the authoritative NestJS server.
 
 ## Definition of Done (DoD)
-- [ ] WebSocket server starts automatically with NestJS on the `/game` path.
-- [ ] Client connections authenticate via a JWT (passed in the connection payload or query param).
-- [ ] Server correctly handles `move_intent` and `bomb_intent` messages.
-- [ ] Server can push events (`hero_move_confirmed`, `hero_move_rejected`, `bomb_validated`) back to the client.
-- [ ] Unknown or malformed messages are safely ignored.
+- [x] WebSocket server starts automatically with NestJS on the `/game` path.
+- [x] Client connections authenticate via a JWT (passed in the connection payload or query param).
+- [x] Server correctly handles `move_intent` and `bomb_intent` messages.
+- [x] Server can push events (`hero_move_confirmed`, `hero_move_rejected`, `bomb_validated`) back to the client.
+- [x] Unknown or malformed messages are safely ignored.
 
 ## User Stories
 

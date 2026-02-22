@@ -18,7 +18,8 @@
       "Bash(npm install:*)",
       "Bash(npx nest:*)",
       "Bash(npm test:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git add:*)"
     ]
   }
 }
