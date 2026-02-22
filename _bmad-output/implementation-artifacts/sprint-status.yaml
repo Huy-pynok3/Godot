@@ -108,10 +108,10 @@ development_status:
   B1-2-define-prisma-schema: done
   B1-3-configure-redis-module: done
   epic-B1-retrospective: optional
-  epic-B2: backlog
-  B2-1-implement-nonce-generation: backlog
-  B2-2-implement-signature-verification: backlog
-  B2-3-create-auth-guard: backlog
+  epic-B2: done
+  B2-1-implement-nonce-generation: done
+  B2-2-implement-signature-verification: done
+  B2-3-create-auth-guard: done
   epic-B2-retrospective: optional
   epic-B3: backlog
   B3-1-setup-websocket-gateway: backlog

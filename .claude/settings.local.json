@@ -17,7 +17,8 @@
       "Bash(cd backend:*)",
       "Bash(npm install:*)",
       "Bash(npx nest:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
