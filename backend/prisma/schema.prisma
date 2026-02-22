@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  walletAddress String   @unique @db.VarChar(42)
+  nonce         String
+  banned        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  heroes        Hero[]
+  sessions      TreasureSession[]
+  ledgerEntries RewardLedger[]
+  claims        Claim[]
+}
+
+model Hero {
+  id            String   @id @default(uuid()) // Internal ID
+  tokenId       Int      @unique // NFT Token ID
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  // Stats (Snapshot from chain/metadata)
+  power         Int
+  speed         Int
+  staminaMax    Int
+  bombRange     Int
+
+  // State
+  staminaCurrent Float
+  lastRestTime   DateTime // Used for lazy stamina calculation
+
+  @@index([userId])
+}
+
+model TreasureSession {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  status        String   // e.g. "ACTIVE", "COMPLETED", "ABORTED"
+  startTime     DateTime @default(now())
+  endTime       DateTime?
+
+  chestState    Json?    // Serialized snapshot of chest locations and HP
+}
+
+model RewardLedger {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Decimal  @db.Decimal(20, 8) // Positive for earnings, Negative for claims
+  source        String   // e.g., "CHEST_DESTROY", "CLAIM_WITHDRAWAL"
+  referenceId   String?  // ID of the chest, session, or claim
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Claim {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Decimal  @db.Decimal(20, 8)
+
+  // Voucher data
+  nonce         Int
+  deadline      Int
+  signature     String
+
+  // Lifecycle
+  status        String   // "QUOTED", "SUBMITTED", "VERIFIED", "FAILED"
+  txHash        String?  @unique
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, status])
+}
