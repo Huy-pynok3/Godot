@@ -11,14 +11,9 @@ config_version=5
 [application]
 
 config/name="BombCrypto Remake"
-config/features=PackedStringArray("4.6", "gl_compatibility")
-config/icon="res://icon.svg"
 run/main_scene="res://scenes/main.tscn"
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
+config/features=PackedStringArray("4.6")
+config/icon="res://icon.svg"
 
 [autoload]
 
@@ -27,3 +22,8 @@ GameState="*res://autoloads/game_state.gd"
 Web3Manager="*res://autoloads/web3_manager.gd"
 ServerAPI="*res://autoloads/server_api.gd"
 NFTCache="*res://autoloads/nft_cache.gd"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

@@ -8,4 +8,3 @@ func _ready() -> void:
 			add_child(panel_scene.instantiate())
 		else:
 			AppLogger.warn("Main", "DebugPanel scene not found — will be added in ST-1.6")
-

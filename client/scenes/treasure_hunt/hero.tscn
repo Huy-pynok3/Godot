@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://d0m57y6r1p11v"]
+
+[ext_resource type="Script" path="res://scenes/treasure_hunt/hero.gd" id="1_q2w3e"]
+
+[node name="Hero" type="Node2D"]
+script = ExtResource("1_q2w3e")

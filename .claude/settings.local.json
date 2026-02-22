@@ -3,7 +3,21 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:godotengine.org)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(node:*)",
+      "mcp__godot-mcp__update_project_uids",
+      "mcp__godot-mcp__stop_project",
+      "mcp__godot-mcp__run_project",
+      "mcp__godot-mcp__get_debug_output",
+      "mcp__godot-mcp__get_uid",
+      "mcp__godot-mcp__create_scene",
+      "Bash(cat:*)",
+      "mcp__godot-mcp__save_scene",
+      "mcp__godot-mcp__add_node",
+      "Bash(cd backend:*)",
+      "Bash(npm install:*)",
+      "Bash(npx nest:*)",
+      "Bash(npm test:*)"
     ]
   }
 }

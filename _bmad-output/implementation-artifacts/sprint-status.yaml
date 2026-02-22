@@ -1,5 +1,5 @@
-# generated: 2026-02-21
-# project: BombCrypto Remake
+# generated: 2026-02-22
+# project: Godot
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: D:\Godot\_bmad-output\implementation-artifacts
@@ -29,22 +29,18 @@
 # WORKFLOW NOTES:
 # ===============
 # - Epic transitions to 'in-progress' automatically when first story is created
-# - Stories are typically worked sequentially; parallel work supported where noted
-# - SM creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context recommended)
-# - Recommended sprint order: E1 → E2+E3 (parallel) → E4 → E5 → E6+E7 (parallel) → E8 → E9
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-02-21
-project: BombCrypto Remake
+generated: 2026-02-22
+project: Godot
 project_key: NOKEY
 tracking_system: file-system
-story_location: "D:\\Godot\\_bmad-output\\implementation-artifacts"
+story_location: D:\Godot\_bmad-output\implementation-artifacts
 
 development_status:
-  # ─────────────────────────────────────────────
-  # EPIC 1: Core Project Setup & Boilerplate
-  # Depends on: none | Priority: Critical
-  # ─────────────────────────────────────────────
+  # All epics, stories, and retrospectives in order
   epic-1: in-progress
   1-1-create-directory-structure: done
   1-2-applogger-autoload: done
@@ -53,11 +49,6 @@ development_status:
   1-5-main-scene-and-game-phase-fsm-skeleton: done
   1-6-debugpanel: done
   epic-1-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 2: Web3 & MetaMask Integration
-  # Depends on: E1 | Priority: Critical
-  # ─────────────────────────────────────────────
   epic-2: in-progress
   2-1-metamask-bridge-utilities: done
   2-2-wallet-connect-flow: done
@@ -65,11 +56,6 @@ development_status:
   2-4-nft-metadata-fetch: done
   2-5-nft-cache-disk-ttl-1-hour: done
   epic-2-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 3: Server API Layer (REST + WebSocket)
-  # Depends on: E1 | Priority: Critical
-  # ─────────────────────────────────────────────
   epic-3: in-progress
   3-1-websocket-connection-manager: done
   3-2-auto-reconnect-logic: done
@@ -77,45 +63,25 @@ development_status:
   3-4-incoming-message-parser-and-signal-emitter: done
   3-5-rest-http-client: done
   epic-3-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 4: Grid Map & Chest System
-  # Depends on: E1, E3 | Priority: High
-  # ─────────────────────────────────────────────
   epic-4: done
   4-1-gridmap-core: done
   4-2-grid-visual-render: done
   4-3-chest-node: done
   4-4-chest-spawning: done
   epic-4-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 5: Hero System & AI Idle Loop
-  # Depends on: E2, E3, E4 | Priority: Critical
-  # ─────────────────────────────────────────────
   epic-5: in-progress
-  5-1-herofactory: backlog
-  5-2-hero-node-visual-container: backlog
+  5-1-herofactory: done
+  5-2-hero-node-visual-container: ready-for-dev
   5-3-heroai-staggered-timer-and-grid-movement: backlog
   5-4-heroai-optimistic-move-with-server-validation: backlog
   5-5-heroai-bomb-intent: backlog
   5-6-hero-stamina-display-client-mirror: backlog
   epic-5-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 6: Bomb & Explosion System
-  # Depends on: E4, E5 | Priority: High
-  # ─────────────────────────────────────────────
   epic-6: backlog
   6-1-bomb-node-visual-only: backlog
   6-2-bomb-spawn-from-server-confirmation: backlog
   6-3-explosion-effect-and-chest-trigger: backlog
   epic-6-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 7: UI/HUD & Game Screens
-  # Depends on: E2, E3, E5 | Priority: High
-  # ─────────────────────────────────────────────
   epic-7: backlog
   7-1-lobby-screen: backlog
   7-2-herocard-widget: backlog
@@ -123,11 +89,6 @@ development_status:
   7-4-rest-screen: backlog
   7-5-game-phase-transitions-ui-side: backlog
   epic-7-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 8: Game Phase FSM & Full Loop Integration
-  # Depends on: E3, E5, E6, E7 | Priority: High
-  # ─────────────────────────────────────────────
   epic-8: backlog
   8-1-gamephase-statemachine-full: backlog
   8-2-hero-spawn-batch-khi-vao-treasure-hunt: backlog
@@ -135,11 +96,6 @@ development_status:
   8-4-auto-rest-khi-stamina-can: backlog
   8-5-settings-persistence: backlog
   epic-8-retrospective: optional
-
-  # ─────────────────────────────────────────────
-  # EPIC 9: WebGL Export & Performance Polish
-  # Depends on: E8 | Priority: Medium
-  # ─────────────────────────────────────────────
   epic-9: backlog
   9-1-html5-export-configuration: backlog
   9-2-metamask-integration-test-https: backlog
@@ -147,3 +103,35 @@ development_status:
   9-4-browser-edge-cases: backlog
   9-5-audio-and-visuals-polish: backlog
   epic-9-retrospective: optional
+  epic-B1: done
+  B1-1-scaffold-nestjs-and-docker: done
+  B1-2-define-prisma-schema: done
+  B1-3-configure-redis-module: done
+  epic-B1-retrospective: optional
+  epic-B2: backlog
+  B2-1-implement-nonce-generation: backlog
+  B2-2-implement-signature-verification: backlog
+  B2-3-create-auth-guard: backlog
+  epic-B2-retrospective: optional
+  epic-B3: backlog
+  B3-1-setup-websocket-gateway: backlog
+  B3-2-define-protocol-dtos: backlog
+  B3-3-implement-intent-handlers-stub: backlog
+  epic-B3-retrospective: optional
+  epic-B4: backlog
+  B4-1-implement-session-start-stop: backlog
+  B4-2-implement-a-movement-validation: backlog
+  B4-3-implement-bomb-validation-and-explosion: backlog
+  B4-4-implement-authoritative-stamina-drain: backlog
+  epic-B4-retrospective: optional
+  epic-B5: backlog
+  B5-1-implement-rewardledger: backlog
+  B5-2-implement-pendingbalance-aggregation: backlog
+  B5-3-generate-eip-712-claim-quote: backlog
+  epic-B5-retrospective: optional
+  epic-B6: backlog
+  B6-1-setup-bullmq-and-redis: backlog
+  B6-2-accept-claim-submissions: backlog
+  B6-3-verify-transaction-and-decode-logs: backlog
+  B6-4-finalize-ledger-and-unlock-balance: backlog
+  epic-B6-retrospective: optional
