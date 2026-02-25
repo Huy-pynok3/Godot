@@ -1,12 +1,18 @@
 class_name GridVisual
 extends Node2D
 
-const _COLOR_EVEN := Color(0.15, 0.15, 0.15)
-const _COLOR_ODD  := Color(0.20, 0.20, 0.20)
+const _COLOR_EVEN := Color(0.10, 0.56, 0.52)
+const _COLOR_ODD  := Color(0.08, 0.50, 0.46)
+const _COLOR_HARD := Color(0.82, 0.84, 0.86)
+const _COLOR_SOFT := Color(0.78, 0.43, 0.16)
+const _COLOR_CHEST := Color(0.63, 0.40, 0.20)
 
 ## Pixel size of each grid cell, computed from viewport in _ready().
 ## Zero until _ready() fires — do not call cell_to_pixel/pixel_to_cell before then.
 var tile_size: Vector2
+var _hard_blocks := {}
+var _soft_blocks := {}
+var _chest_cells := {}
 
 
 func _ready() -> void:
@@ -15,13 +21,35 @@ func _ready() -> void:
 	queue_redraw()
 
 
+func set_map_layout(hard_blocks: Array, soft_blocks: Array, chest_cells: Array = []) -> void:
+	_hard_blocks.clear()
+	_soft_blocks.clear()
+	_chest_cells.clear()
+	for cell in hard_blocks:
+		_hard_blocks[cell] = true
+	for cell in soft_blocks:
+		_soft_blocks[cell] = true
+	for cell in chest_cells:
+		_chest_cells[cell] = true
+	queue_redraw()
+
+
 func _draw() -> void:
 	if tile_size == Vector2.ZERO:
 		return
 	for x in range(Constants.GRID_SIZE.x):
 		for y in range(Constants.GRID_SIZE.y):
+			var cell := Vector2i(x, y)
 			var color := _COLOR_EVEN if (x + y) % 2 == 0 else _COLOR_ODD
 			draw_rect(Rect2(Vector2(x, y) * tile_size, tile_size), color)
+			if _hard_blocks.has(cell):
+				draw_rect(Rect2(Vector2(x, y) * tile_size + Vector2(2, 2), tile_size - Vector2(4, 4)), _COLOR_HARD)
+			elif _soft_blocks.has(cell):
+				draw_rect(Rect2(Vector2(x, y) * tile_size + Vector2(2, 2), tile_size - Vector2(4, 4)), _COLOR_SOFT)
+			if _chest_cells.has(cell):
+				var chest_size := tile_size * 0.55
+				var chest_pos := Vector2(x, y) * tile_size + (tile_size - chest_size) / 2.0
+				draw_rect(Rect2(chest_pos, chest_size), _COLOR_CHEST)
 
 
 ## Returns the top-left pixel position of a grid cell.

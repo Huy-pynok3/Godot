@@ -3,8 +3,10 @@ extends Node
 
 ## Sentinel value used in _occupied to mark a cell as blocked by a chest (not a hero).
 const CHEST_ID := -1
+const HARD_BLOCK_ID := -2
+const SOFT_BLOCK_ID := -3
 ## Sentinel returned by Dictionary.get() when a key is absent.
-## Must be outside the valid range of both hero_id (>= 0) and CHEST_ID (-1).
+## Must be outside the valid range of hero/block/chest ids.
 const _ABSENT := -999
 
 ## Maps Vector2i cell → int occupant id (hero_id, or CHEST_ID for chests).
@@ -78,6 +80,22 @@ func mark_chest_cell(cell: Vector2i) -> void:
 		AppLogger.warn("GameGrid", "mark_chest_cell OOB", {"cell": cell})
 		return
 	_occupied[cell] = CHEST_ID
+
+
+func mark_hard_block_cell(cell: Vector2i) -> void:
+	if not _in_bounds(cell):
+		return
+	_occupied[cell] = HARD_BLOCK_ID
+
+
+func mark_soft_block_cell(cell: Vector2i) -> void:
+	if not _in_bounds(cell):
+		return
+	_occupied[cell] = SOFT_BLOCK_ID
+
+
+func clear_all_cells() -> void:
+	_occupied.clear()
 
 
 ## Unmarks a chest cell. Only erases if the stored value is CHEST_ID.
