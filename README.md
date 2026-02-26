@@ -60,7 +60,7 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 - **Pattern:** Checkerboard (brown chests + white walls)
 - **Heroes:** 6-8 heroes visible (max 15)
 - **Objects:** Bombs, explosions, BCOIN drops
-- **UI:** Timer (30.94s), BCOIN counter, icons
+- **UI:** BCOIN counter (ví dụ 30.94), BCOIN label, icons (không phải timer)
 
 ---
 
@@ -83,7 +83,7 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 | ❌ Fixed Walls (Checkerboard) | 0% | Chưa có pattern cố định |
 | ❌ BCOIN Drop + Collect | 0% | Chưa có drop animation + auto-collect |
 | ❌ Multi-hero (15 heroes) | 0% | Chưa spawn nhiều hero cùng lúc |
-| ❌ Session Timer | 0% | Chưa có countdown + auto-end |
+| ❌ Map Progression (Clear All Chests) | 0% | Chưa có logic chuyển map khi phá hết rương |
 | ❌ Hero Skins/Colors | 0% | Chưa có visual differentiation |
 | ❌ AI Auto-play | 0% | Chưa có pathfinding |
 | ❌ Chain Reaction | 0% | Bomb chưa kích bomb khác |
@@ -102,7 +102,7 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 🔍 **Multiple Heroes:** 6-8 heroes khác màu trên map
 🔍 **BCOIN Drops:** Coins màu vàng rơi tại vị trí chest destroyed
 🔍 **Explosion Visual:** Màu đỏ/cam, rõ ràng cross pattern
-🔍 **UI Top Bar:** Timer, BCOIN counter, House icon, Settings
+🔍 **UI Top Bar:** BCOIN counter, House icon, Settings (không có map timer)
 
 ## 🎮 Gameplay Mechanics (theo BombCrypto 2021)
 
@@ -119,12 +119,12 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 3. Đặt bomb để phá chests (1-3 HP)
 4. Collect BCOIN rơi ra
 5. Stamina drain → Rest → Repeat
-6. Session kết thúc sau X phút
+6. Phá hết rương trong map → chuyển sang map mới
 
 ### Game Map Layout (từ BombCrypto 2021)
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ ⏱️ 30.94    💰 BCOIN    🏠 House    ⚙️ Settings                  │
+│ 💰 30.94    BCOIN    🏠 House    ⚙️ Settings                     │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  🟩 🟫 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩    │
@@ -174,7 +174,7 @@ PATTERN QUAN TRỌNG:
 - HP: 1-3 (random)
 - Drop: 8-12 BCOIN (tùy HP)
 - Có thể phá bằng bomb
-- Respawn: Không (trong 1 session)
+- Respawn: Không (trong 1 map)
 - Vị trí: Random trên các ô không có fixed wall
 
 **3. Heroes (Colored bombers):**
@@ -454,7 +454,7 @@ Gợi ý 2 hướng:
 ### ❌ Chưa hoàn thiện:
 - **Multi-hero spawning:** Chỉ có logic 1 hero, chưa spawn 15 heroes
 - **BCOIN collection:** Chest drop BCOIN nhưng chưa có auto-collect
-- **Session timer:** Backend có TreasureSession nhưng chưa có countdown
+- **Map progression:** Backend có TreasureSession nhưng chưa có logic clear-all-chests -> map mới
 - **Map obstacles:** Chưa có fixed walls và destructible blocks
 - **AI pathfinding:** Chưa có auto-play mode
 - **NFT metadata:** Contract address vẫn là placeholder
@@ -482,7 +482,7 @@ npm run lint
 ### Phase 1: Core Gameplay Loop (Ưu tiên cao)
 - [ ] BCOIN drop + auto-collection system
 - [ ] Multiple heroes spawning (15 heroes)
-- [ ] Session timer + auto-end
+- [ ] Clear-all-chests detection + auto-load next map
 - [ ] Hero manager (quản lý nhiều heroes)
 - [ ] Balance update real-time
 
@@ -500,7 +500,7 @@ npm run lint
 - [ ] BCOIN drop animation (coin rơi xuống + sparkle)
 - [ ] Chest destruction effect (fade out)
 - [ ] Stamina bar UI cho mỗi hero (trên đầu hero)
-- [ ] Top bar UI (timer, BCOIN counter, house icon, settings)
+- [ ] Top bar UI (BCOIN counter, house icon, settings)
 
 ### Phase 4: Lobby & Navigation
 - [ ] **Lobby screen** với 3 mode cards (Adventure, Treasure Hunt, Battle)
@@ -682,7 +682,7 @@ Chain: Bomb can trigger other bombs
 ❌ Multi-hero (15 heroes) - chưa spawn nhiều  
 ❌ AI auto-play - chưa có pathfinding  
 ❌ Fixed walls/obstacles - chỉ có chest  
-❌ Session timer - chưa countdown  
+❌ Map progression clear-all-chests - chưa chuyển map tự động  
 ❌ House NFT - chưa có rest speed boost  
 ❌ Story Mode - chỉ có Treasure Hunt  
 ❌ Battle Mode - chưa có PvP  
