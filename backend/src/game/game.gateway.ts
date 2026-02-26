@@ -5,7 +5,7 @@ import {
   WebSocketServer,
   SubscribeMessage,
   MessageBody,
-  ConnectedSocket
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
@@ -15,11 +15,15 @@ import { Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { MoveIntentDto } from './dto/move-intent.dto';
 import { BombIntentDto } from './dto/bomb-intent.dto';
+import { GridService, MoveRejectionReason } from '../treasure/grid.service';
+import { RedisLockService } from '../common/redis-lock.service';
 
-@UsePipes(new ValidationPipe({
-  transform: true,
-  exceptionFactory: (errors) => new WsException(errors),
-}))
+@UsePipes(
+  new ValidationPipe({
+    transform: true,
+    exceptionFactory: (errors) => new WsException(errors),
+  }),
+)
 @WebSocketGateway({ namespace: 'game' })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -31,6 +35,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly redisService: RedisService,
+    private readonly gridService: GridService,
+    private readonly lockService: RedisLockService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -98,13 +104,96 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('move_intent')
-  handleMoveIntent(
+  async handleMoveIntent(
     @MessageBody() moveIntentDto: MoveIntentDto,
     @ConnectedSocket() client: Socket,
-  ) {
-    // Stub implementation for now
-    this.logger.log(`Received move_intent from ${client.id}: hero ${moveIntentDto.hero_id} to (${moveIntentDto.x}, ${moveIntentDto.y})`);
-    client.emit('hero_move_confirmed', { hero_id: moveIntentDto.hero_id, x: moveIntentDto.x, y: moveIntentDto.y });
+  ): Promise<void> {
+    const tokenId = moveIntentDto.hero_id; // hero_id is the NFT token ID
+    const { x, y } = moveIntentDto;
+    const userId = client.data.user?.id; // User ID from JWT payload
+
+    if (!userId) {
+      this.logger.warn(`Move intent rejected: No user ID in socket data`);
+      this.emitMoveRejected(client, tokenId, MoveRejectionReason.SERVER_ERROR);
+      return;
+    }
+
+    const lockKey = `lock:hero_action:${tokenId}`;
+
+    try {
+      // Acquire lock
+      const lockAcquired = await this.lockService.acquireLock(lockKey, 500);
+      if (!lockAcquired) {
+        this.logger.warn(
+          `Move intent rejected: Lock acquisition failed for hero ${tokenId}`,
+        );
+        this.emitMoveRejected(client, tokenId, MoveRejectionReason.LOCKED);
+        return;
+      }
+
+      try {
+        // Validate move
+        const validation = await this.gridService.validateMove(
+          userId,
+          tokenId,
+          x,
+          y,
+        );
+
+        if (!validation.valid) {
+          this.logger.log(
+            `Move rejected for hero ${tokenId}: ${validation.reason}`,
+          );
+          this.emitMoveRejected(
+            client,
+            tokenId,
+            validation.reason || MoveRejectionReason.SERVER_ERROR,
+          );
+          return;
+        }
+
+        // Update position
+        await this.gridService.updateHeroPosition(userId, tokenId, { x, y });
+
+        // Emit confirmation
+        this.logger.log(`Move confirmed for hero ${tokenId} to (${x}, ${y})`);
+        this.emitMoveConfirmed(client, tokenId, x, y);
+      } finally {
+        // Always release lock
+        await this.lockService.releaseLock(lockKey);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Move intent error for hero ${tokenId}: ${error.message}`,
+        error.stack,
+      );
+      this.emitMoveRejected(client, tokenId, MoveRejectionReason.SERVER_ERROR);
+    }
+  }
+
+  private emitMoveConfirmed(
+    client: Socket,
+    tokenId: number,
+    x: number,
+    y: number,
+  ): void {
+    client.emit('hero_move_confirmed', {
+      tokenId,
+      position: { x, y },
+      timestamp: Date.now(),
+    });
+  }
+
+  private emitMoveRejected(
+    client: Socket,
+    tokenId: number,
+    reason: MoveRejectionReason,
+  ): void {
+    client.emit('hero_move_rejected', {
+      tokenId,
+      reason,
+      timestamp: Date.now(),
+    });
   }
 
   @SubscribeMessage('bomb_intent')

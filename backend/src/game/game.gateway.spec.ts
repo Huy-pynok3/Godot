@@ -3,6 +3,8 @@ import { GameGateway } from './game.gateway';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service';
+import { GridService } from '../treasure/grid.service';
+import { RedisLockService } from '../common/redis-lock.service';
 import { Socket } from 'socket.io';
 import { MoveIntentDto } from './dto/move-intent.dto';
 import { BombIntentDto } from './dto/bomb-intent.dto';
@@ -12,6 +14,8 @@ describe('GameGateway', () => {
   let mockJwtService: any;
   let mockConfigService: any;
   let mockRedisService: any;
+  let mockGridService: any;
+  let mockLockService: any;
 
   beforeEach(async () => {
     mockJwtService = {
@@ -28,12 +32,24 @@ describe('GameGateway', () => {
       del: jest.fn(),
     };
 
+    mockGridService = {
+      validateMove: jest.fn(),
+      updateHeroPosition: jest.fn(),
+    };
+
+    mockLockService = {
+      acquireLock: jest.fn(),
+      releaseLock: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameGateway,
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: RedisService, useValue: mockRedisService },
+        { provide: GridService, useValue: mockGridService },
+        { provide: RedisLockService, useValue: mockLockService },
       ],
     }).compile();
 

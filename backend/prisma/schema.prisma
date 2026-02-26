@@ -52,6 +52,8 @@ model TreasureSession {
   endTime       DateTime?
 
   chestState    Json?    // Serialized snapshot of chest locations and HP
+  
+  @@index([userId, status])
 }
 
 model RewardLedger {

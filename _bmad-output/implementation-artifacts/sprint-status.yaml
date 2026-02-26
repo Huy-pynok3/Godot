@@ -118,9 +118,9 @@ development_status:
   B3-2-define-protocol-dtos: done
   B3-3-implement-intent-handlers-stub: done
   epic-B3-retrospective: optional
-  epic-B4: backlog
-  B4-1-implement-session-start-stop: backlog
-  B4-2-implement-a-movement-validation: backlog
+  epic-B4: in-progress
+  B4-1-implement-session-start-stop: done
+  B4-2-implement-a-movement-validation: in-progress
   B4-3-implement-bomb-validation-and-explosion: backlog
   B4-4-implement-authoritative-stamina-drain: backlog
   epic-B4-retrospective: optional
