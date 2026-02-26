@@ -57,4 +57,23 @@ export class RedisService implements OnApplicationBootstrap {
     const result = await this.redis.set(key, value, 'EX', ttlSeconds, 'NX');
     return result === 'OK';
   }
+
+  /**
+   * Delete a key.
+   * @param key The key to delete
+   */
+  async del(key: string): Promise<void> {
+    await this.redis.del(key);
+  }
+
+  /**
+   * Execute a Lua script in Redis.
+   * @param script The Lua script to execute
+   * @param keys The keys that the script will access
+   * @param args The arguments to pass to the script
+   * @returns The script result
+   */
+  async eval(script: string, keys: string[], args: any[]): Promise<any> {
+    return this.redis.eval(script, keys.length, ...keys, ...args);
+  }
 }

@@ -120,9 +120,9 @@ development_status:
   epic-B3-retrospective: optional
   epic-B4: in-progress
   B4-1-implement-session-start-stop: done
-  B4-2-implement-a-movement-validation: in-progress
-  B4-3-implement-bomb-validation-and-explosion: backlog
-  B4-4-implement-authoritative-stamina-drain: backlog
+  B4-2-implement-a-movement-validation: done
+  B4-3-implement-bomb-validation-and-explosion: done
+  B4-4-implement-authoritative-stamina-drain: done
   epic-B4-retrospective: optional
   epic-B5: backlog
   B5-1-implement-rewardledger: backlog

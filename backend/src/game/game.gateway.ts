@@ -17,6 +17,7 @@ import { MoveIntentDto } from './dto/move-intent.dto';
 import { BombIntentDto } from './dto/bomb-intent.dto';
 import { GridService, MoveRejectionReason } from '../treasure/grid.service';
 import { RedisLockService } from '../common/redis-lock.service';
+import { HeroService } from '../treasure/hero.service';
 
 @UsePipes(
   new ValidationPipe({
@@ -37,6 +38,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly redisService: RedisService,
     private readonly gridService: GridService,
     private readonly lockService: RedisLockService,
+    private readonly heroService: HeroService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -51,18 +53,27 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
+      // 1. Authenticate & Join Session Room
+      const token = this.extractTokenFromHandshake(client);
+      if (!token) {
+        client.disconnect();
+        return;
+      }
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET', 'super-secret-default-key-for-dev'),
       });
-
-      // Attach the payload to the socket object
       client.data.user = payload;
 
-      // Store connection mapping in Redis: walletAddress -> socketId
+      const userId = payload.id;
       const walletAddress = payload.walletAddress;
+
+      // Join a room specifically for this user's session
+      client.join(`session:${userId}`);
+
+      // Store connection mapping in Redis: walletAddress -> socketId
       await this.redisService.set(`connection:${walletAddress}`, client.id);
 
-      this.logger.log(`Client connected successfully: ${client.id} (Wallet: ${walletAddress})`);
+      this.logger.log(`Client connected successfully: ${client.id} (Wallet: ${walletAddress}, Session: ${userId})`);
     } catch (error) {
       this.logger.warn(`Disconnecting client ${client.id}: Invalid token`);
       client.disconnect();
@@ -132,7 +143,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       try {
-        // Validate move
+        // 0. Verify Stamina first
+        const hero = await this.heroService.getHero(tokenId);
+        if (!hero || !this.heroService.hasSufficientStamina(hero)) {
+          this.logger.log(`Move rejected for hero ${tokenId}: Insufficient stamina`);
+          this.emitMoveRejected(client, tokenId, MoveRejectionReason.INSUFFICIENT_STAMINA);
+          return;
+        }
+
+        // 1. Validate move
         const validation = await this.gridService.validateMove(
           userId,
           tokenId,
@@ -197,13 +216,98 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('bomb_intent')
-  handleBombIntent(
+  async handleBombIntent(
     @MessageBody() bombIntentDto: BombIntentDto,
     @ConnectedSocket() client: Socket,
-  ) {
-    // Stub implementation for now
-    this.logger.log(`Received bomb_intent from ${client.id}: hero ${bombIntentDto.hero_id} at (${bombIntentDto.x}, ${bombIntentDto.y})`);
-    client.emit('bomb_validated', { hero_id: bombIntentDto.hero_id, x: bombIntentDto.x, y: bombIntentDto.y, chest_destroyed: false });
+  ): Promise<void> {
+    const tokenId = bombIntentDto.hero_id;
+    const { x, y } = bombIntentDto;
+    const userId = client.data.user?.id;
+
+    if (!userId) {
+      this.logger.warn(`Bomb intent rejected: No user ID in socket data`);
+      return;
+    }
+
+    const lockKey = `lock:hero_action:${tokenId}`;
+
+    try {
+      // Acquire lock
+      const lockAcquired = await this.lockService.acquireLock(lockKey, 500);
+      if (!lockAcquired) {
+        this.logger.warn(`Bomb intent rejected: Lock acquisition failed for hero ${tokenId}`);
+        return;
+      }
+
+      try {
+        // 1. Verify position
+        const currentPos = await this.gridService.getHeroPosition(userId, tokenId);
+        if (!currentPos || currentPos.x !== x || currentPos.y !== y) {
+          this.logger.warn(`Bomb intent rejected: Position mismatch for hero ${tokenId}`);
+          return;
+        }
+
+        // 2. Get Hero data & Check Stamina
+        const hero = await this.heroService.getHero(tokenId);
+        if (!hero || !this.heroService.hasSufficientStamina(hero)) {
+          this.logger.warn(`Bomb intent rejected: Insufficient stamina for hero ${tokenId}`);
+          client.emit('hero_bomb_rejected', {
+            hero_id: tokenId,
+            reason: MoveRejectionReason.INSUFFICIENT_STAMINA,
+          });
+          return;
+        }
+
+        // 3. Drain Stamina
+        const updatedHero = await this.heroService.drainStamina(tokenId);
+
+        // 3.1 Emit stamina update to session
+        this.server.to(`session:${userId}`).emit('stamina_updated', {
+          hero_id: tokenId,
+          stamina: updatedHero.staminaCurrent,
+        });
+
+        // 4. Emit confirmation
+        client.emit('bomb_validated', { hero_id: tokenId, x, y });
+
+        // 5. Calculate Explosion & Hit Chests
+        const MAX_BOMB_RANGE = 5; // Safety cap
+        const range = Math.min(hero.bombRange || 1, MAX_BOMB_RANGE);
+
+        const affectedCells = this.calculateCrossPattern(x, y, range);
+        for (const cell of affectedCells) {
+          const hitResult = await this.gridService.hitChest(userId, cell.x, cell.y);
+          if (hitResult.hit) {
+            this.server.to(`session:${userId}`).emit('chest_hit', {
+              x: cell.x,
+              y: cell.y,
+              hero_id: tokenId,
+              destroyed: hitResult.destroyed,
+            });
+
+            if (hitResult.destroyed) {
+              this.server.to(`session:${userId}`).emit('chest_destroyed', {
+                x: cell.x,
+                y: cell.y,
+                hero_id: tokenId,
+              });
+            }
+          }
+        }
+      } finally {
+        await this.lockService.releaseLock(lockKey);
+      }
+    } catch (error) {
+      this.logger.error(`Bomb intent error for hero ${tokenId}: ${error.message}`, error.stack);
+    }
+  }
+
+  private calculateCrossPattern(x: number, y: number, range: number): { x: number; y: number }[] {
+    const cells = [{ x, y }];
+    for (let i = 1; i <= range; i++) {
+      cells.push({ x: x + i, y }, { x: x - i, y }, { x, y: y + i }, { x, y: y - i });
+    }
+    return cells;
   }
 
   @SubscribeMessage('heartbeat')

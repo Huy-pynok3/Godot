@@ -3,8 +3,9 @@ import { GameGateway } from './game.gateway';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../redis/redis.service';
-import { GridService } from '../treasure/grid.service';
+import { GridService, MoveRejectionReason } from '../treasure/grid.service';
 import { RedisLockService } from '../common/redis-lock.service';
+import { HeroService } from '../treasure/hero.service';
 import { Socket } from 'socket.io';
 import { MoveIntentDto } from './dto/move-intent.dto';
 import { BombIntentDto } from './dto/bomb-intent.dto';
@@ -16,6 +17,7 @@ describe('GameGateway', () => {
   let mockRedisService: any;
   let mockGridService: any;
   let mockLockService: any;
+  let mockHeroService: any;
 
   beforeEach(async () => {
     mockJwtService = {
@@ -35,11 +37,19 @@ describe('GameGateway', () => {
     mockGridService = {
       validateMove: jest.fn(),
       updateHeroPosition: jest.fn(),
+      getHeroPosition: jest.fn(),
+      hitChest: jest.fn(),
     };
 
     mockLockService = {
       acquireLock: jest.fn(),
       releaseLock: jest.fn(),
+    };
+
+    mockHeroService = {
+      getHero: jest.fn(),
+      hasSufficientStamina: jest.fn(),
+      drainStamina: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -50,6 +60,7 @@ describe('GameGateway', () => {
         { provide: RedisService, useValue: mockRedisService },
         { provide: GridService, useValue: mockGridService },
         { provide: RedisLockService, useValue: mockLockService },
+        { provide: HeroService, useValue: mockHeroService },
       ],
     }).compile();
 
@@ -71,13 +82,16 @@ describe('GameGateway', () => {
       handshake.headers = { authorization: `Bearer ${tokenValue}` };
     }
 
-    return {
+    const client = {
       id: 'mock-socket-id',
       handshake,
       disconnect: jest.fn(),
       emit: jest.fn(),
+      join: jest.fn(),
       data: {},
     } as unknown as Socket;
+
+    return client;
   };
 
   it('should be defined', () => {
@@ -186,30 +200,181 @@ describe('GameGateway', () => {
   });
 
   describe('handleMoveIntent', () => {
-    it('should emit hero_move_confirmed with dto data', () => {
+    it('should reject move if stamina is insufficient', async () => {
       const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
       const dto = new MoveIntentDto();
       dto.hero_id = 1;
       dto.x = 5;
       dto.y = 10;
 
-      gateway.handleMoveIntent(dto, client);
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 1, staminaCurrent: 0.1 }); // Low stamina
+      mockHeroService.hasSufficientStamina.mockReturnValue(false);
 
-      expect(client.emit).toHaveBeenCalledWith('hero_move_confirmed', { hero_id: 1, x: 5, y: 10 });
+      await gateway.handleMoveIntent(dto, client);
+
+      expect(client.emit).toHaveBeenCalledWith(
+        'hero_move_rejected',
+        expect.objectContaining({
+          tokenId: 1,
+          reason: MoveRejectionReason.INSUFFICIENT_STAMINA,
+        }),
+      );
+      expect(mockGridService.validateMove).not.toHaveBeenCalled();
     });
-  });
-
-  describe('handleBombIntent', () => {
-    it('should emit bomb_validated with dto data', () => {
+    it('should emit hero_move_confirmed with dto data when valid', async () => {
       const client = createMockSocket('auth', 'valid');
-      const dto = new BombIntentDto();
+      client.data.user = { id: 'user-1' };
+      const dto = new MoveIntentDto();
       dto.hero_id = 1;
       dto.x = 5;
       dto.y = 10;
 
-      gateway.handleBombIntent(dto, client);
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 1, staminaCurrent: 10.0 });
+      mockHeroService.hasSufficientStamina.mockReturnValue(true);
+      mockGridService.validateMove.mockResolvedValue({ valid: true });
 
-      expect(client.emit).toHaveBeenCalledWith('bomb_validated', { hero_id: 1, x: 5, y: 10, chest_destroyed: false });
+      await gateway.handleMoveIntent(dto, client);
+
+      expect(client.emit).toHaveBeenCalledWith(
+        'hero_move_confirmed',
+        expect.objectContaining({
+          tokenId: 1,
+          position: { x: 5, y: 10 },
+        }),
+      );
+      expect(mockLockService.releaseLock).toHaveBeenCalled();
+    });
+
+    it('should emit hero_move_rejected when validation fails', async () => {
+      const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
+      const dto = new MoveIntentDto();
+      dto.hero_id = 1;
+      dto.x = 5;
+      dto.y = 10;
+
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 1, staminaCurrent: 10.0 });
+      mockHeroService.hasSufficientStamina.mockReturnValue(true);
+      mockGridService.validateMove.mockResolvedValue({
+        valid: false,
+        reason: MoveRejectionReason.OBSTACLE,
+      });
+
+      await gateway.handleMoveIntent(dto, client);
+
+      expect(client.emit).toHaveBeenCalledWith(
+        'hero_move_rejected',
+        expect.objectContaining({
+          tokenId: 1,
+          reason: MoveRejectionReason.OBSTACLE,
+        }),
+      );
+    });
+  });
+
+  describe('handleBombIntent', () => {
+    it('should validate bomb, drain stamina, and emit confirmed and updated stamina', async () => {
+      const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
+      const dto = new BombIntentDto();
+      dto.hero_id = 123;
+      dto.x = 5;
+      dto.y = 5;
+
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockGridService.getHeroPosition.mockResolvedValue({ x: 5, y: 5 });
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 123, staminaCurrent: 10.0, power: 1, bombRange: 2 });
+      mockHeroService.hasSufficientStamina.mockReturnValue(true);
+      mockHeroService.drainStamina.mockResolvedValue({ tokenId: 123, staminaCurrent: 9.0 }); // New mock
+      mockGridService.hitChest.mockResolvedValue({ hit: false, destroyed: false });
+
+      const mockServer = {
+        to: jest.fn().mockReturnThis(),
+        emit: jest.fn(),
+      };
+      (gateway as any).server = mockServer;
+
+      await gateway.handleBombIntent(dto, client);
+
+      expect(mockLockService.acquireLock).toHaveBeenCalled();
+      expect(mockHeroService.drainStamina).toHaveBeenCalledWith(123);
+      expect(client.emit).toHaveBeenCalledWith('bomb_validated', expect.objectContaining({ hero_id: 123, x: 5, y: 5 }));
+      expect(mockServer.to).toHaveBeenCalledWith('session:user-1');
+      expect(mockServer.emit).toHaveBeenCalledWith('stamina_updated', expect.objectContaining({ hero_id: 123, stamina: 9.0 }));
+      expect(mockLockService.releaseLock).toHaveBeenCalled();
+    });
+
+    it('should emit chest_destroyed when a chest is destroyed', async () => {
+      const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
+      const dto = new BombIntentDto();
+      dto.hero_id = 123;
+      dto.x = 5;
+      dto.y = 5;
+
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockGridService.getHeroPosition.mockResolvedValue({ x: 5, y: 5 });
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 123, staminaCurrent: 10, power: 1, bombRange: 1 });
+      mockHeroService.hasSufficientStamina.mockReturnValue(true);
+      mockHeroService.drainStamina.mockResolvedValue({ tokenId: 123, staminaCurrent: 9.0 });
+
+      const mockServer = {
+        to: jest.fn().mockReturnThis(),
+        emit: jest.fn(),
+      };
+      (gateway as any).server = mockServer;
+
+      // Center hit
+      mockGridService.hitChest.mockResolvedValueOnce({ hit: true, destroyed: true });
+      // Others miss
+      mockGridService.hitChest.mockResolvedValue({ hit: false, destroyed: false });
+
+      await gateway.handleBombIntent(dto, client);
+
+      expect(mockServer.to).toHaveBeenCalledWith('session:user-1');
+      expect(mockServer.emit).toHaveBeenCalledWith('chest_destroyed', expect.objectContaining({ x: 5, y: 5, hero_id: 123 }));
+    });
+
+    it('should reject if position mismatch', async () => {
+      const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
+      const dto = new BombIntentDto();
+      dto.hero_id = 123;
+      dto.x = 5;
+      dto.y = 5;
+
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockGridService.getHeroPosition.mockResolvedValue({ x: 10, y: 10 }); // Mismatch
+
+      await gateway.handleBombIntent(dto, client);
+
+      expect(mockHeroService.drainStamina).not.toHaveBeenCalled();
+      expect(client.emit).not.toHaveBeenCalledWith('bomb_validated', expect.any(Object));
+      expect(mockLockService.releaseLock).toHaveBeenCalled();
+    });
+
+    it('should reject if stamina insufficient', async () => {
+      const client = createMockSocket('auth', 'valid');
+      client.data.user = { id: 'user-1' };
+      const dto = new BombIntentDto();
+      dto.hero_id = 123;
+      dto.x = 5;
+      dto.y = 5;
+
+      mockLockService.acquireLock.mockResolvedValue(true);
+      mockGridService.getHeroPosition.mockResolvedValue({ x: 5, y: 5 });
+      mockHeroService.getHero.mockResolvedValue({ tokenId: 123, staminaCurrent: 0.5 });
+      mockHeroService.hasSufficientStamina.mockReturnValue(false);
+
+      await gateway.handleBombIntent(dto, client);
+
+      expect(client.emit).toHaveBeenCalledWith('hero_bomb_rejected', expect.objectContaining({ hero_id: 123, reason: MoveRejectionReason.INSUFFICIENT_STAMINA }));
+      expect(mockHeroService.drainStamina).not.toHaveBeenCalled();
+      expect(mockLockService.releaseLock).toHaveBeenCalled();
     });
   });
 

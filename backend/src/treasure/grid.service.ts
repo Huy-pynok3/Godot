@@ -19,6 +19,7 @@ export enum MoveRejectionReason {
   INVALID_PATH = 'INVALID_PATH',
   OUT_OF_BOUNDS = 'OUT_OF_BOUNDS',
   OBSTACLE = 'OBSTACLE',
+  INSUFFICIENT_STAMINA = 'INSUFFICIENT_STAMINA',
   SERVER_ERROR = 'SERVER_ERROR',
 }
 
@@ -33,7 +34,7 @@ export class GridService {
   /**
    * Load grid from Redis
    */
-  async loadGrid(userId: number): Promise<ChestData[] | null> {
+  async loadGrid(userId: string): Promise<ChestData[] | null> {
     try {
       const gridJson = await this.redis.get(`session:${userId}:grid`);
       if (!gridJson) {
@@ -50,7 +51,7 @@ export class GridService {
    * Get hero's last known position
    */
   async getHeroPosition(
-    userId: number,
+    userId: string,
     tokenId: number,
   ): Promise<Position | null> {
     try {
@@ -71,7 +72,7 @@ export class GridService {
    * Update hero's position in Redis
    */
   async updateHeroPosition(
-    userId: number,
+    userId: string,
     tokenId: number,
     position: Position,
   ): Promise<void> {
@@ -79,7 +80,6 @@ export class GridService {
       await this.redis.set(
         `hero:${userId}:${tokenId}:position`,
         JSON.stringify(position),
-        'EX',
         86400, // 24 hours TTL
       );
     } catch (error) {
@@ -92,7 +92,7 @@ export class GridService {
    * Validate if a move is legal
    */
   async validateMove(
-    userId: number,
+    userId: string,
     tokenId: number,
     targetX: number,
     targetY: number,
@@ -129,6 +129,58 @@ export class GridService {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Hit a chest at specific position atomically using Lua.
+   */
+  async hitChest(
+    userId: string,
+    x: number,
+    y: number,
+  ): Promise<{ hit: boolean; destroyed: boolean }> {
+    const key = `session:${userId}:grid`;
+    const script = `
+      local gridJson = redis.call('GET', KEYS[1])
+      if not gridJson then return {0, 0} end
+
+      local grid = cjson.decode(gridJson)
+      local hit = false
+      local destroyed = false
+      local targetX = tonumber(ARGV[1])
+      local targetY = tonumber(ARGV[2])
+
+      for i, chest in ipairs(grid) do
+        if chest.x == targetX and chest.y == targetY then
+          hit = true
+          chest.hp = chest.hp - 1
+          if chest.hp <= 0 then
+            table.remove(grid, i)
+            destroyed = true
+          end
+          break
+        end
+      end
+
+      if hit then
+        redis.call('SET', KEYS[1], cjson.encode(grid), 'EX', 86400)
+        return {1, destroyed and 1 or 0}
+      end
+
+      return {0, 0}
+    `;
+
+    try {
+      const result = await this.redis.eval(script, [key], [x, y]);
+      return {
+        hit: result[0] === 1,
+        destroyed: result[1] === 1,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to hit chest at (${x}, ${y}) via Lua`, error.stack);
+      // Fallback or re-throw
+      throw error;
+    }
   }
 
   private isInBounds(x: number, y: number): boolean {

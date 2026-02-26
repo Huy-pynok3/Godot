@@ -15,6 +15,7 @@ describe('GridService', () => {
           useValue: {
             get: jest.fn(),
             set: jest.fn(),
+            eval: jest.fn(),
           },
         },
       ],
@@ -32,16 +33,16 @@ describe('GridService', () => {
       ];
       jest.spyOn(redis, 'get').mockResolvedValue(JSON.stringify(grid));
 
-      const result = await service.loadGrid(1);
+      const result = await service.loadGrid('user-1');
 
       expect(result).toEqual(grid);
-      expect(redis.get).toHaveBeenCalledWith('session:1:grid');
+      expect(redis.get).toHaveBeenCalledWith('session:user-1:grid');
     });
 
     it('should return null when grid not found', async () => {
       jest.spyOn(redis, 'get').mockResolvedValue(null);
 
-      const result = await service.loadGrid(1);
+      const result = await service.loadGrid('user-1');
 
       expect(result).toBeNull();
     });
@@ -49,7 +50,7 @@ describe('GridService', () => {
     it('should handle JSON parse errors gracefully', async () => {
       jest.spyOn(redis, 'get').mockResolvedValue('invalid json');
 
-      const result = await service.loadGrid(1);
+      const result = await service.loadGrid('user-1');
 
       expect(result).toBeNull();
     });
@@ -60,16 +61,16 @@ describe('GridService', () => {
       const position = { x: 5, y: 7 };
       jest.spyOn(redis, 'get').mockResolvedValue(JSON.stringify(position));
 
-      const result = await service.getHeroPosition(1, 123);
+      const result = await service.getHeroPosition('user-1', 123);
 
       expect(result).toEqual(position);
-      expect(redis.get).toHaveBeenCalledWith('hero:1:123:position');
+      expect(redis.get).toHaveBeenCalledWith('hero:user-1:123:position');
     });
 
     it('should return null when position not found', async () => {
       jest.spyOn(redis, 'get').mockResolvedValue(null);
 
-      const result = await service.getHeroPosition(1, 123);
+      const result = await service.getHeroPosition('user-1', 123);
 
       expect(result).toBeNull();
     });
@@ -77,12 +78,11 @@ describe('GridService', () => {
 
   describe('updateHeroPosition', () => {
     it('should store position in Redis with TTL', async () => {
-      await service.updateHeroPosition(1, 123, { x: 5, y: 5 });
+      await service.updateHeroPosition('user-1', 123, { x: 5, y: 5 });
 
       expect(redis.set).toHaveBeenCalledWith(
-        'hero:1:123:position',
+        'hero:user-1:123:position',
         JSON.stringify({ x: 5, y: 5 }),
-        'EX',
         86400,
       );
     });
@@ -96,7 +96,7 @@ describe('GridService', () => {
         .mockResolvedValueOnce(JSON.stringify(grid))
         .mockResolvedValueOnce(JSON.stringify({ x: 3, y: 3 }));
 
-      const result = await service.validateMove(1, 123, 3, 4);
+      const result = await service.validateMove('user-1', 123, 3, 4);
 
       expect(result.valid).toBe(true);
       expect(result.reason).toBeUndefined();
@@ -109,7 +109,7 @@ describe('GridService', () => {
         .mockResolvedValueOnce(JSON.stringify(grid))
         .mockResolvedValueOnce(JSON.stringify({ x: 3, y: 3 }));
 
-      const result = await service.validateMove(1, 123, 3, 4);
+      const result = await service.validateMove('user-1', 123, 3, 4);
 
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(MoveRejectionReason.OBSTACLE);
@@ -122,7 +122,7 @@ describe('GridService', () => {
         .mockResolvedValueOnce(JSON.stringify(grid))
         .mockResolvedValueOnce(JSON.stringify({ x: 19, y: 14 }));
 
-      const result = await service.validateMove(1, 123, 20, 14);
+      const result = await service.validateMove('user-1', 123, 20, 14);
 
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(MoveRejectionReason.OUT_OF_BOUNDS);
@@ -135,7 +135,7 @@ describe('GridService', () => {
         .mockResolvedValueOnce(JSON.stringify(grid))
         .mockResolvedValueOnce(JSON.stringify({ x: 3, y: 3 }));
 
-      const result = await service.validateMove(1, 123, 5, 5);
+      const result = await service.validateMove('user-1', 123, 5, 5);
 
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(MoveRejectionReason.INVALID_PATH);
@@ -144,7 +144,7 @@ describe('GridService', () => {
     it('should reject when grid not found', async () => {
       jest.spyOn(redis, 'get').mockResolvedValueOnce(null);
 
-      const result = await service.validateMove(1, 123, 3, 4);
+      const result = await service.validateMove('user-1', 123, 3, 4);
 
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(MoveRejectionReason.NO_SESSION);
@@ -157,10 +157,44 @@ describe('GridService', () => {
         .mockResolvedValueOnce(JSON.stringify(grid))
         .mockResolvedValueOnce(null);
 
-      const result = await service.validateMove(1, 123, 3, 4);
+      const result = await service.validateMove('user-1', 123, 3, 4);
 
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(MoveRejectionReason.NO_POSITION);
+    });
+  });
+
+  describe('hitChest', () => {
+    it('should call Redis eval with correct Lua script and arguments', async () => {
+      jest.spyOn(redis, 'eval').mockResolvedValue([1, 0]);
+
+      const result = await service.hitChest('user-1', 5, 5);
+
+      expect(result.hit).toBe(true);
+      expect(result.destroyed).toBe(false);
+      expect(redis.eval).toHaveBeenCalledWith(
+        expect.stringContaining('cjson.decode'),
+        ['session:user-1:grid'],
+        [5, 5],
+      );
+    });
+
+    it('should return destroyed true when Lua script returns 1 for destroyed', async () => {
+      jest.spyOn(redis, 'eval').mockResolvedValue([1, 1]);
+
+      const result = await service.hitChest('user-1', 5, 5);
+
+      expect(result.hit).toBe(true);
+      expect(result.destroyed).toBe(true);
+    });
+
+    it('should return hit false if Lua script returns 0', async () => {
+      jest.spyOn(redis, 'eval').mockResolvedValue([0, 0]);
+
+      const result = await service.hitChest('user-1', 10, 10);
+
+      expect(result.hit).toBe(false);
+      expect(result.destroyed).toBe(false);
     });
   });
 });
