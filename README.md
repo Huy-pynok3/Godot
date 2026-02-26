@@ -6,22 +6,103 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 
 > **Trạng thái hiện tại:** ~35% hoàn thiện - Core mechanics đã có, đang triển khai gameplay loop và multi-hero system.
 
+## 🎮 Screenshots & Game Modes
+
+### Game Lobby - Mode Selection
+![BombCrypto Lobby](assets/screenshots/bombcrypto-lobby.png)
+
+**3 Game Modes:**
+1. **ADVENTURE** (Coming Soon) - Story mode với levels
+2. **TREASURE HUNT** - Main P2E mode, farm BCOIN
+3. **BATTLE** (Coming Soon) - PvP mode
+
+**Bottom Menu:**
+- 🎁 **CHEST** - Mở chest để nhận heroes
+- 🏪 **SHOP** - Mua heroes và houses
+- 🏠 **HOUSE** - Tăng stamina recovery speed
+- 👥 **HEROES** - Quản lý hero collection
+
+---
+
+### Shop System
+![BombCrypto Shop](assets/screenshots/bombcrypto-shop.webp)
+
+**Shop Features:**
+- **+10 Heroes Pack** - Mua 10 heroes random (gacha system)
+- **Buy House** - Mua nhà để tăng rest speed
+- **BUY Button** - Mua bằng BCOIN
+- **×10 Option** - Mua bulk với discount
+
+**House NFT Benefits:**
+- Tăng stamina recovery rate
+- Passive income boost
+- Multiple houses = faster recovery
+
+---
+
+### Treasure Hunt Gameplay (Animated)
+![BombCrypto Gameplay GIF](https://dappradar.com/blog/static/0d20b61b169c47af059ebc4f23a066bd/dappradar.com-play-to-earn-bomb-crypto-becomes-top-3-game-0-kqgfp6vxn89vdypl.gif)
+
+**Gameplay Mechanics từ GIF:**
+- Multiple heroes di chuyển đồng thời
+- Bombs đặt và nổ theo cross pattern
+- Chests bị phá → BCOIN drops
+- Heroes auto-collect coins
+- Real-time multiplayer action
+
+---
+
+### Treasure Hunt Mode (Static)
+![BombCrypto Treasure Hunt](assets/screenshots/bombcrypto-gameplay.png)
+
+**Map Analysis:**
+- **Grid:** 20x15 tiles
+- **Pattern:** Checkerboard (brown chests + white walls)
+- **Heroes:** 6-8 heroes visible (max 15)
+- **Objects:** Bombs, explosions, BCOIN drops
+- **UI:** Timer (30.94s), BCOIN counter, icons
+
+---
+
 ## 📊 Độ hoàn thiện so với BombCrypto 2021
 
 | Tính năng | Trạng thái | Ghi chú |
 |-----------|-----------|---------|
+| **Core Gameplay** |
 | ✅ Hero NFT System | 50% | Stats, stamina, energy drain đã có |
 | ✅ Bomb Mechanics | 40% | Placement, explosion, cross-pattern |
 | ✅ Chest System | 60% | HP, damage, destroy logic |
 | ✅ Grid Map 20x15 | 80% | Grid logic, collision detection |
 | ✅ WebSocket Real-time | 60% | Move, bomb intents validated |
 | ✅ Auth + JWT | 80% | Wallet login, nonce verification |
-| ❌ BCOIN Collection | 0% | Chưa có drop + auto-collect |
+| **Game Modes** |
+| ✅ Treasure Hunt | 40% | Core logic có, chưa hoàn chỉnh |
+| ❌ Adventure Mode | 0% | Story mode chưa có |
+| ❌ Battle Mode | 0% | PvP chưa có |
+| **Features** |
+| ❌ Fixed Walls (Checkerboard) | 0% | Chưa có pattern cố định |
+| ❌ BCOIN Drop + Collect | 0% | Chưa có drop animation + auto-collect |
 | ❌ Multi-hero (15 heroes) | 0% | Chưa spawn nhiều hero cùng lúc |
 | ❌ Session Timer | 0% | Chưa có countdown + auto-end |
-| ❌ Fixed Walls/Blocks | 0% | Chỉ có chest, chưa có obstacles |
+| ❌ Hero Skins/Colors | 0% | Chưa có visual differentiation |
 | ❌ AI Auto-play | 0% | Chưa có pathfinding |
+| ❌ Chain Reaction | 0% | Bomb chưa kích bomb khác |
+| **Economy & NFT** |
+| ❌ Shop System | 0% | Chưa có buy heroes/houses |
+| ❌ Chest Opening | 0% | Chưa có gacha system |
+| ❌ House NFT | 0% | Chưa có rest speed boost |
+| ❌ Hero Management UI | 0% | Chưa có inventory screen |
 | ❌ NFT Contract Integration | 10% | Placeholder contract address |
+
+### Phát hiện mới từ ảnh:
+🔍 **Lobby System:** 3 game modes (Adventure, Treasure Hunt, Battle)
+🔍 **Shop System:** Buy heroes pack (×10), buy houses
+🔍 **Bottom Menu:** Chest, Shop, House, Heroes navigation
+🔍 **Map Pattern:** Checkerboard với fixed walls xen kẽ chests
+🔍 **Multiple Heroes:** 6-8 heroes khác màu trên map
+🔍 **BCOIN Drops:** Coins màu vàng rơi tại vị trí chest destroyed
+🔍 **Explosion Visual:** Màu đỏ/cam, rõ ràng cross pattern
+🔍 **UI Top Bar:** Timer, BCOIN counter, House icon, Settings
 
 ## 🎮 Gameplay Mechanics (theo BombCrypto 2021)
 
@@ -40,31 +121,80 @@ Dự án game BombCrypto-style Play-to-Earn NFT gồm:
 5. Stamina drain → Rest → Repeat
 6. Session kết thúc sau X phút
 
-### Game Map Layout (ASCII)
+### Game Map Layout (từ BombCrypto 2021)
 ```
-┌─────────────────────────────────────────────────────────┐
-│ Timer: 30.94    💰 BCOIN: 125.50    🏠 ⚙️              │
-├─────────────────────────────────────────────────────────┤
-│ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░              │
-│ ░ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ░              │
-│ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░              │
-│ ░ 📦 ▓ 🤖 ▓ 📦 ▓ 💣 ▓ 📦 ▓ 📦 ▓ 🤖 ▓ 📦 ░              │
-│ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░              │
-│ ░ 📦 ▓ 📦 ▓ 💰 ▓ 📦 ▓ 🤖 ▓ 📦 ▓ 📦 ▓ 📦 ░              │
-│ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░ ▓ ░              │
-│ ░ 📦 ▓ 📦 ▓ 📦 ▓ 🔥 ▓ 📦 ▓ 📦 ▓ 📦 ▓ 📦 ░              │
-│ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░              │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│ ⏱️ 30.94    💰 BCOIN    🏠 House    ⚙️ Settings                  │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  🟩 🟫 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩    │
+│  🟫 🟩 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 � 🟩 🟫 🟩 � 🟩 � 🟩 �    │
+│  � 🟩 🤖 � 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫    │
+│  🟩 🟫 🟫 🟩 🟫 🟩 🟫 💣 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩    │
+│  🟫 🟩 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 � 🟫 � 🟫 � 🟫 � 🟫 🟩 🟫    │
+│  🟫 🟩 🤖 🟫 � 🟫 � 🟫 � 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫    │
+│  🟩 🟫 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩    │
+│  🟫 🟩 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫    │
+│  🟫 � 🤖 🟫 � 🟫 � 🟫 🔥 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫    │
+│  🟩 🟫 � 🟩 � 🟩 � 🟩 � 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩 🟫 🟩    │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
 
-Legend:
-  ░ = Walkable tile
-  ▓ = Fixed wall (không phá được)
-  📦 = Chest (1-3 HP)
-  🤖 = Hero (bomber)
-  💣 = Bomb (3s timer)
-  🔥 = Explosion
-  💰 = BCOIN drop
+Phân tích từ ảnh thực tế:
+┌─────────────────────────────────────────────────────────────────┐
+│ OBJECTS TRÊN MAP:                                               │
+├─────────────────────────────────────────────────────────────────┤
+│ 🟫 Brown Blocks (Chests)  - Có thể phá, drop BCOIN             │
+│ 🟩 White/Gray Blocks      - Fixed walls, KHÔNG phá được        │
+│ 🤖 Heroes (nhiều màu)     - Purple, Blue, Green, Yellow, Red   │
+│ 💣 Bombs                  - Màu vàng/cam, có timer             │
+│ 🔥 Explosions             - Màu đỏ/cam, cross pattern          │
+│ 💰 BCOIN Drops            - Màu vàng, rơi từ chests phá hủy    │
+│ 🟢 Green Background       - Walkable tiles                     │
+└─────────────────────────────────────────────────────────────────┘
+
+PATTERN QUAN TRỌNG:
+- Map có CHECKERBOARD pattern: Brown/White xen kẽ
+- Fixed walls (white) tạo mê cung cố định
+- Chests (brown) spawn random trên các ô cố định
+- Heroes có thể đi qua ô xanh và ô có BCOIN
+- Bombs đặt tại vị trí hero đứng
+- Explosion lan theo cross pattern (+)
 ```
+
+### Các loại Objects chi tiết
+
+**1. Fixed Walls (White/Gray blocks):**
+- Không thể phá hủy
+- Tạo pattern cố định theo checkerboard
+- Block movement và explosion
+- Vị trí: Các ô chẵn/lẻ theo pattern
+
+**2. Chests (Brown blocks):**
+- HP: 1-3 (random)
+- Drop: 8-12 BCOIN (tùy HP)
+- Có thể phá bằng bomb
+- Respawn: Không (trong 1 session)
+- Vị trí: Random trên các ô không có fixed wall
+
+**3. Heroes (Colored bombers):**
+- Màu sắc: Purple, Blue, Green, Yellow, Red, Pink
+- Mỗi hero có stats riêng (NFT)
+- Có stamina bar (không thấy trong ảnh nhưng có trong game)
+- Di chuyển: 4 directions (up/down/left/right)
+- Max: 15 heroes cùng lúc
+
+**4. Bombs:**
+- Timer: 3 seconds
+- Visual: Màu vàng/cam với số đếm ngược
+- Explosion: Cross pattern theo bomb_range stat
+- Chain reaction: Có thể kích bomb khác
+
+**5. BCOIN Drops:**
+- Màu vàng sáng
+- Auto-collect khi hero đi qua
+- Lifetime: ~5 seconds trước khi biến mất
+- Value: Hiển thị số trên UI top bar
 
 ---
 
@@ -356,38 +486,77 @@ npm run lint
 - [ ] Hero manager (quản lý nhiều heroes)
 - [ ] Balance update real-time
 
-### Phase 2: Map & Obstacles
-- [ ] Fixed walls generation (không phá được)
-- [ ] Destructible blocks (phá được, không drop BCOIN)
-- [ ] Map pattern/layout system
-- [ ] Collision detection với walls
+### Phase 2: Map & Obstacles (QUAN TRỌNG - từ ảnh thực tế)
+- [ ] **Checkerboard pattern generation** (fixed walls xen kẽ chests)
+- [ ] Fixed walls (white/gray blocks) - KHÔNG phá được, block movement
+- [ ] Chests (brown blocks) - spawn random, có thể phá
+- [ ] Collision detection với fixed walls
+- [ ] Map layout theo pattern BombCrypto gốc (20x15 grid)
 
-### Phase 3: Advanced Mechanics
+### Phase 3: Visual & Animation (Cần cho UX)
+- [ ] Hero sprites với nhiều màu (purple, blue, green, yellow, red, pink)
+- [ ] Bomb sprite + countdown timer visual (3, 2, 1)
+- [ ] Explosion animation (cross pattern, màu đỏ/cam)
+- [ ] BCOIN drop animation (coin rơi xuống + sparkle)
+- [ ] Chest destruction effect (fade out)
+- [ ] Stamina bar UI cho mỗi hero (trên đầu hero)
+- [ ] Top bar UI (timer, BCOIN counter, house icon, settings)
+
+### Phase 4: Lobby & Navigation
+- [ ] **Lobby screen** với 3 mode cards (Adventure, Treasure Hunt, Battle)
+- [ ] Mode selection UI
+- [ ] Bottom navigation menu (Chest, Shop, House, Heroes)
+- [ ] Scene transitions
+- [ ] Coming Soon placeholders cho Adventure/Battle
+
+### Phase 5: Shop System
+- [ ] **Shop UI** - Buy heroes pack (×1, ×10)
+- [ ] **Buy House UI** - Purchase house NFT
+- [ ] Hero gacha system (random stats)
+- [ ] Chest opening animation
+- [ ] BCOIN pricing system
+- [ ] Transaction confirmation dialogs
+
+### Phase 6: Hero Management
+- [ ] **Heroes screen** - View all owned heroes
+- [ ] Hero inventory grid
+- [ ] Hero details popup (stats, level, rarity)
+- [ ] Select heroes for battle (max 15)
+- [ ] Hero sorting/filtering
+- [ ] Sell/transfer heroes
+
+### Phase 7: House System
+- [ ] **House NFT** - Stamina recovery boost
+- [ ] Multiple houses support
+- [ ] House upgrade system
+- [ ] Visual house display
+- [ ] Passive income calculation
+
+### Phase 8: Advanced Mechanics
 - [ ] Bomb chain reaction
 - [ ] Power-ups (speed boost, bomb count, range)
 - [ ] Hero AI/Auto-play mode
 - [ ] Pathfinding algorithm (A*)
 
-### Phase 4: Real-time Sync & Anti-cheat
+### Phase 9: Real-time Sync & Anti-cheat
 - [ ] Broadcast hero positions to all clients
 - [ ] Sync bomb explosions
 - [ ] Sync chest destruction
 - [ ] Server-side validation tất cả actions
 - [ ] Chốt protocol (Socket.IO hoặc raw WS)
 
-### Phase 5: NFT Integration
+### Phase 10: NFT Integration
 - [ ] Deploy/connect smart contract thực
 - [ ] Fetch hero metadata from chain
 - [ ] Claim BCOIN to wallet với signature
 - [ ] Hero marketplace integration
 
-### Phase 6: UI/UX Polish
-- [ ] Hero sprites + animations
-- [ ] Bomb explosion effects
-- [ ] Chest destruction animation
-- [ ] Stamina bar UI
-- [ ] BCOIN counter + floating text
-- [ ] Sound effects + music
+### Phase 11: Polish & Optimization
+- [ ] Sound effects (bomb, explosion, coin collect)
+- [ ] Background music
+- [ ] Particle effects
+- [ ] Performance optimization (object pooling)
+- [ ] Mobile responsive (nếu cần)
 
 ---
 
@@ -572,4 +741,3 @@ Chain: Bomb can trigger other bombs
 
 ## License
 
-Tạm thời theo cấu hình hiện tại của repo (chưa khai báo chính thức ở root). Nếu public project, nên bổ sung LICENSE rõ ràng.
